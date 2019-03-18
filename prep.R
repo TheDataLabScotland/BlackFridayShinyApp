@@ -8,6 +8,8 @@ BFsales[ , User_ID := as.factor( User_ID ) ]
 
 BFsales[ , Product_ID := as.factor( Product_ID ) ]
 
+BFsales[ , Occupation := as.factor( Occupation ) ]
+
 BFsales[ , Gender := as.factor( Gender ) ]
 levels( BFsales$Gender ) <- c( "Female", "Male" )
 
@@ -39,11 +41,17 @@ ggplot( BFsales[ User_ID %in% random_customers, ], aes( x = AgeNum, y = Purchase
 
 
 # What product category seems to suit what ages??
-purchase_by_age_agr <- aggregate( Purchase ~ Age + Gender + Product_Category_1 + Marital_Status, data = BFsales, FUN = mean )
-ggplot( purchase_by_age_agr, aes( x = Product_Category_1, y = Purchase, group = Age, color = Age ) ) + 
-  geom_line() + facet_grid( Marital_Status ~ Gender )
+purchase_by_age_agr <- aggregate( Purchase ~ User_ID + Age + City_Category, data = BFsales, FUN = sum )
+purchase_by_age_agr <- aggregate( Purchase ~ Age + City_Category, data = BFsales, FUN = mean )
+
+ggplot( purchase_by_age_agr, 
+        aes( x = City_Category, y = Purchase, group = Age, color = Age ) ) + 
+  geom_line( lwd = 1 )
 
 
-
-
+# Now to investigate this further with an interactive app. 
+# We can tackle questions such as:
+## Is this relationship even more abrupt when looking at people residing in these cities for 4+ years, compared to 1 year?
+## Does product category affect this relationship?
+## Marital status, gender, occupation - any influence?
 
