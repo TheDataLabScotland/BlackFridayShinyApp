@@ -17,11 +17,25 @@ shinyApp(
   
   ui = fluidPage(
     
-    titlePanel( "Black Friday sales" ),
+    titlePanel( tagList( icon( "shopping-basket" ), "Black Friday sales" ) ),
     br(),
     sidebarLayout(
       
       sidebarPanel( width = 3,
+                    
+                    checkboxGroupInput( inputId = "Gender", 
+                                        label = "Select customer gender:", 
+                                        choices = c( "Male", "Female" ), 
+                                        selected = c( "Male", "Female" ) ),
+                    
+                    br(),
+                    
+                    sliderInput( inputId = "YearsSpentInCity", 
+                                 label = "Number of years lived in city:",
+                                 min = 0, max = 4, 
+                                 value = c( 0, 4 ) ),
+                    
+                    br(),
                     
                     radioButtons(
                       inputId = "splitByProdCat",
@@ -29,6 +43,8 @@ shinyApp(
                       choices = c( "No" = "No",
                                    "Yes" = "Yes" ),
                       selected = "No" ),
+                    
+                    br(),
                     
                     conditionalPanel(
                       condition = "input.splitByProdCat == 'Yes'",
@@ -39,10 +55,14 @@ shinyApp(
       ),
       
       mainPanel ( width = 9,
+                  
+                  h2( "Line graph" ),
                   plotOutput( outputId = "linePlot", width = 640 ),
                   br(),
+                  h3( "My table" ),
                   tableOutput( outputId = "dataDescr" ),
                   br(),
+                  h4( "Sample size" ),
                   verbatimTextOutput( outputId = "info" )
                   
       )
@@ -68,13 +88,17 @@ shinyApp(
       BFsales[ , User_ID := as.factor( User_ID ) ]
       BFsales[ , Product_ID := as.factor( Product_ID ) ]
       BFsales[ , Occupation := as.factor( Occupation ) ]
+      
       BFsales[ , Gender := as.factor( Gender ) ]
       levels( BFsales$Gender ) <- c( "Female", "Male" )
+      
+      BFsales[ , Stay_In_Current_City_Years := ifelse( Stay_In_Current_City_Years == "4+", "4", Stay_In_Current_City_Years ) ]
       BFsales[ , Stay_In_Current_City_Years := ordered( Stay_In_Current_City_Years, 
                                                         levels = sort( unique( Stay_In_Current_City_Years ) ) ) ]
       
       BFsales[ , Marital_Status := factor( Marital_Status ) ]
       levels( BFsales$Marital_Status ) <- c( "Married", "Single" )
+      
       BFsales[ , Product_Category_1 := as.factor( Product_Category_1 ) ]
       BFsales[ , Product_Category_2 := as.factor( Product_Category_2 ) ]
       BFsales[ , Product_Category_3 := as.factor( Product_Category_3 ) ]
@@ -86,6 +110,10 @@ shinyApp(
       return( BFsales )
       
     })
+    
+    
+    
+    
     
     output$productCategories <- renderUI({
       selectInput( inputId = "prodCats",
@@ -103,7 +131,6 @@ shinyApp(
     subsetData <- reactive({
       print( "GENERATING DATA SUBSET BASED ON INPUTS" )
       
-      # Scenarios / Rules:
       if ( input$splitByProdCat == 'No' ) {
         selected_subset <- prepData()
       }
@@ -111,6 +138,12 @@ shinyApp(
         validate( need( ! is.null( input$prodCats ), "Please wait. Generating dynamic menu from data..." ) )
         selected_subset <- prepData()[ Product_Category_1 == input$prodCats, ]
       }
+
+      
+      selected_subset <- selected_subset[ Gender %in% input$Gender, ]
+      
+      selected_subset <- selected_subset[ input$YearsSpentInCity[ 1 ] <= Stay_In_Current_City_Years & 
+                                            Stay_In_Current_City_Years <= input$YearsSpentInCity[ 2 ], ]
 
       return( selected_subset )
       
