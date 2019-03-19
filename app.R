@@ -23,7 +23,18 @@ shinyApp(
       
       sidebarPanel( width = 3,
                     
-                    uiOutput( "productCategories" )      # show all product categories
+                    radioButtons(
+                      inputId = "splitByProdCat",
+                      label = "Subset by product category?",
+                      choices = c( "No" = "No",
+                                   "Yes" = "Yes" ),
+                      selected = "No" ),
+                    
+                    conditionalPanel(
+                      condition = "input.splitByProdCat == 'Yes'",
+                      uiOutput( "productCategories" )      # show all product categories
+                    )
+                    
                     
       ),
       
@@ -35,9 +46,7 @@ shinyApp(
                   verbatimTextOutput( outputId = "info" )
                   
       )
-      
     )
-    
   ),
   
   
@@ -49,9 +58,9 @@ shinyApp(
   
   server = function( input, output ) {
     
-
+    
     prepData <- reactive({
-
+      
       print( "PREPPING DATA ON START" )
       
       BFsales <- fread( "/home/caterina/Documents/TDL_PrivateRepos/BlackFridayShinyApp/BlackFriday.csv" )
@@ -73,16 +82,14 @@ shinyApp(
       BFsales[ , Age := ifelse( Age == "0-17", "Under 17", Age ) ]
       BFsales[ , Age := ifelse( Age == "55+", "Over 55", Age ) ]
       BFsales[ , Age := ordered( Age, levels = c( "Under 17", "18-25", "26-35",  "36-45", "46-50", "51-55", "Over 55" ) ) ]
-
+      
       return( BFsales )
       
     })
-
-
     
     output$productCategories <- renderUI({
       selectInput( inputId = "prodCats",
-                   label = "Product categories: ",
+                   label = "Select product category: ",
                    choices = levels( prepData()$Product_Category_1 ),
                    selected = min( as.numeric( prepData()$Product_Category_1 ) ) )
     })
@@ -90,13 +97,34 @@ shinyApp(
     
     
     
+    
+    
+    
+    subsetData <- reactive({
+      print( "GENERATING DATA SUBSET BASED ON INPUTS" )
+      
+      # Scenarios / Rules:
+      if ( input$splitByProdCat == 'No' ) {
+        selected_subset <- prepData()
+      }
+      else if ( input$splitByProdCat == 'Yes' ) {
+        validate( need( ! is.null( input$prodCats ), "Please wait. Generating dynamic menu from data..." ) )
+        selected_subset <- prepData()[ Product_Category_1 == input$prodCats, ]
+      }
+
+      return( selected_subset )
+      
+    })
+    
+    
+    
     getAverageSpend <- reactive({
-      purchase_agr <- aggregate( Purchase ~ User_ID + Age + City_Category, data = prepData(), FUN = sum )
+      purchase_agr <- aggregate( Purchase ~ User_ID + Age + City_Category, data = subsetData(), FUN = sum )
       purchase_agr <- aggregate( Purchase ~ Age + City_Category, data = purchase_agr, FUN = mean )
       return( purchase_agr )
     })
-
-
+    
+    
     
     output$dataDescr <- renderTable({
       
@@ -106,16 +134,19 @@ shinyApp(
       tabular_vals[ , A := format( A, nsmall = 2, big.mark = "," ) ]
       tabular_vals[ , B := format( B, nsmall = 2, big.mark = "," ) ]
       tabular_vals[ , C := format( C, nsmall = 2, big.mark = "," ) ]
+      
+      setnames( tabular_vals, c( "Age band", "City A", "City B", "City C" ) )
+      
       return( tabular_vals )
       
     }, align = "r" )
-
-  
+    
+    
     
     
     output$linePlot <- renderPlot({
       print( "DRAWING PLOT" )
-
+      
       ggplot( getAverageSpend(), 
               aes( x = City_Category, y = Purchase, group = Age, color = Age ) ) + 
         geom_point( size = 2.5 ) +
@@ -127,20 +158,21 @@ shinyApp(
                  subtitle = "- Add note here -" )
       
     })
-
-
+    
+    
     output$info <- renderText({
       print( "GETTING SAMPLE SIZE" )
       
-      sample_size_per_city_type <- aggregate( User_ID ~ City_Category, data = prepData(), FUN = length )
+      sample_size_per_city_type <- aggregate( User_ID ~ City_Category, data = subsetData(), FUN = function( x ) length( unique( x ) ) )
       A <- sample_size_per_city_type[[ 2 ]][ 1 ]
       B <- sample_size_per_city_type[[ 2 ]][ 2 ]
       C <- sample_size_per_city_type[[ 2 ]][ 3 ]
       
-      paste( "Total number of customers size for each city type: \n",
+      paste( "Total number of customers for each city type (under input conditions defined): \n",
              "A =", format( A, big.mark = "," ), "\n",
              "B =", format( B, big.mark = "," ), "\n",
              "C =", format( C, big.mark = "," ) )
+
     })
     
   }
