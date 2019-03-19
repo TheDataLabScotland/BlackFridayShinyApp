@@ -3,7 +3,7 @@ library( data.table )
 library( ggplot2 )
 library( viridis )
 
-BFsales <- fread( "/home/caterina/Documents/BlackFridayShinyApp/BlackFriday.csv" )
+BFsales <- fread( "/home/caterina/Documents/TDL_PrivateRepos/BlackFridayShinyApp/BlackFriday.csv" )
 
 BFsales[ , User_ID := as.factor( User_ID ) ]
 
@@ -23,13 +23,9 @@ BFsales[ , Product_Category_1 := as.factor( Product_Category_1 ) ]
 BFsales[ , Product_Category_2 := as.factor( Product_Category_2 ) ]
 BFsales[ , Product_Category_3 := as.factor( Product_Category_3 ) ]
 
-BFsales[ , Age := ifelse( Age == "0-17", "11-17", Age ) ]
-BFsales[ , Age := ifelse( Age == "55+", "56-85", Age ) ]
-BFsales[ , AgeMin := as.numeric( gsub( "([0-9]+)?.*", "\\1", Age ) ) ]
-BFsales[ , AgeMax := as.numeric( gsub( "^.*-([0-9]+)$", "\\1", Age ) ) ]
-BFsales[ , Age := ordered( Age, levels = sort( unique( Age ) ) ) ]
-runif_vectorized <- Vectorize( runif )
-BFsales[ , AgeNum := runif_vectorized( 1, min = AgeMin, max = AgeMax ) ]
+BFsales[ , Age := ifelse( Age == "0-17", "Under 17", Age ) ]
+BFsales[ , Age := ifelse( Age == "55+", "Over 55", Age ) ]
+BFsales[ , Age := ordered( Age, levels = c( "Under 17", "18-25", "26-35",  "36-45", "46-50", "51-55","Over 55" ) ) ]
 
 head( BFsales )
 
@@ -38,7 +34,7 @@ head( BFsales )
 
 # What product category seems to suit what ages??
 purchase_by_age_agr <- aggregate( Purchase ~ User_ID + Age + City_Category, data = BFsales, FUN = sum )
-purchase_by_age_agr <- aggregate( Purchase ~ Age + City_Category, data = BFsales, FUN = mean )
+purchase_by_age_agr <- aggregate( Purchase ~ Age + City_Category, data = purchase_by_age_agr, FUN = mean )
 
 ggplot( purchase_by_age_agr, 
         aes( x = City_Category, y = Purchase, group = Age, color = Age ) ) + 

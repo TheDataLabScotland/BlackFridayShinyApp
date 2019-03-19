@@ -1,8 +1,11 @@
 
 # Packages ----------------------------------------------------------------
 
+options( scipen = 999 )
+
 library( data.table )
 library( ggplot2 )
+library( tidyr )
 
 
 
@@ -44,12 +47,15 @@ shinyApp(
   
   
   
-  server = function( input, output, session ) {
+  server = function( input, output ) {
     
 
-    getData <- reactive({
+    prepData <- reactive({
 
-      BFsales <- fread( "/home/caterina/Documents/BlackFridayShinyApp/BlackFriday.csv" )
+      print( "PREPPING DATA ON START" )
+      
+      BFsales <- fread( "/home/caterina/Documents/TDL_PrivateRepos/BlackFridayShinyApp/BlackFriday.csv" )
+      
       BFsales[ , User_ID := as.factor( User_ID ) ]
       BFsales[ , Product_ID := as.factor( Product_ID ) ]
       BFsales[ , Occupation := as.factor( Occupation ) ]
@@ -64,11 +70,12 @@ shinyApp(
       BFsales[ , Product_Category_2 := as.factor( Product_Category_2 ) ]
       BFsales[ , Product_Category_3 := as.factor( Product_Category_3 ) ]
       
-      BFsales[ , Age := ifelse( Age == "0-17", "11-17", Age ) ]
-      BFsales[ , Age := ifelse( Age == "55+", "56-85", Age ) ]
-      BFsales[ , Age := ordered( Age, levels = sort( unique( Age ) ) ) ]
+      BFsales[ , Age := ifelse( Age == "0-17", "Under 17", Age ) ]
+      BFsales[ , Age := ifelse( Age == "55+", "Over 55", Age ) ]
+      BFsales[ , Age := ordered( Age, levels = c( "Under 17", "18-25", "26-35",  "36-45", "46-50", "51-55", "Over 55" ) ) ]
 
       return( BFsales )
+      
     })
 
 
@@ -76,23 +83,32 @@ shinyApp(
     output$productCategories <- renderUI({
       selectInput( inputId = "prodCats",
                    label = "Product categories: ",
-                   choices = levels( getData()$Product_Category_1 ) )
+                   choices = levels( prepData()$Product_Category_1 ),
+                   selected = min( as.numeric( prepData()$Product_Category_1 ) ) )
     })
     
     
     
     
-    getDataSubset <- reactive({
-      purchase_agr <- aggregate( Purchase ~ User_ID + Age + City_Category, data = getData(), FUN = sum )
-      purchase_agr <- aggregate( Purchase ~ Age + City_Category, data = BFsales, FUN = mean )
+    getAverageSpend <- reactive({
+      purchase_agr <- aggregate( Purchase ~ User_ID + Age + City_Category, data = prepData(), FUN = sum )
+      purchase_agr <- aggregate( Purchase ~ Age + City_Category, data = purchase_agr, FUN = mean )
       return( purchase_agr )
     })
 
 
+    
     output$dataDescr <- renderTable({
+      
       print( "CREATING TABLE OF SUBSET" )
-      getDataSubset() %>% head
-    })
+      tabular_vals <- dcast( Age ~ City_Category, value.var = "Purchase", data = getAverageSpend() )
+      setDT( tabular_vals )
+      tabular_vals[ , A := format( A, nsmall = 2, big.mark = "," ) ]
+      tabular_vals[ , B := format( B, nsmall = 2, big.mark = "," ) ]
+      tabular_vals[ , C := format( C, nsmall = 2, big.mark = "," ) ]
+      return( tabular_vals )
+      
+    }, align = "r" )
 
   
     
@@ -100,7 +116,7 @@ shinyApp(
     output$linePlot <- renderPlot({
       print( "DRAWING PLOT" )
 
-      ggplot( getDataSubset(), 
+      ggplot( getAverageSpend(), 
               aes( x = City_Category, y = Purchase, group = Age, color = Age ) ) + 
         geom_point( size = 2.5 ) +
         geom_line( lwd = 1.5 ) +
@@ -115,7 +131,16 @@ shinyApp(
 
     output$info <- renderText({
       print( "GETTING SAMPLE SIZE" )
-      paste( "No. of data points:", nrow( getDataSubset() ) )
+      
+      sample_size_per_city_type <- aggregate( User_ID ~ City_Category, data = prepData(), FUN = length )
+      A <- sample_size_per_city_type[[ 2 ]][ 1 ]
+      B <- sample_size_per_city_type[[ 2 ]][ 2 ]
+      C <- sample_size_per_city_type[[ 2 ]][ 3 ]
+      
+      paste( "Total number of customers size for each city type: \n",
+             "A =", format( A, big.mark = "," ), "\n",
+             "B =", format( B, big.mark = "," ), "\n",
+             "C =", format( C, big.mark = "," ) )
     })
     
   }
