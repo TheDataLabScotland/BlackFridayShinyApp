@@ -1,8 +1,9 @@
 
 library( data.table )
 library( ggplot2 )
+library( viridis )
 
-BFsales <- fread( "/home/caterina/Documents/TDL_PrivateRepos/BlackFridayShinyApp/BlackFriday.csv" )
+BFsales <- fread( "/home/caterina/Documents/BlackFridayShinyApp/BlackFriday.csv" )
 
 BFsales[ , User_ID := as.factor( User_ID ) ]
 
@@ -33,11 +34,6 @@ BFsales[ , AgeNum := runif_vectorized( 1, min = AgeMin, max = AgeMax ) ]
 head( BFsales )
 
 
-# By person
-random_customers <- sample( unique( BFsales$User_ID ), 4, replace = FALSE )
-ggplot( BFsales[ User_ID %in% random_customers, ], aes( x = AgeNum, y = Purchase ) ) + 
-  geom_line( ) + 
-  facet_grid( .~ User_ID, scales = "free_x" )
 
 
 # What product category seems to suit what ages??
@@ -46,7 +42,13 @@ purchase_by_age_agr <- aggregate( Purchase ~ Age + City_Category, data = BFsales
 
 ggplot( purchase_by_age_agr, 
         aes( x = City_Category, y = Purchase, group = Age, color = Age ) ) + 
-  geom_line( lwd = 1 )
+  geom_point( size = 2.5 ) +
+  geom_line( lwd = 1.5 ) +
+  scale_color_viridis_d( direction = -1, begin = 0.20, end = 0.85, option = "B" ) +
+  labs( x = "City category",
+        color = "Age band" ) +
+  ggtitle( "Average spend according to customer age and city type",
+           subtitle = "- Add note here -" )
 
 
 # Now to investigate this further with an interactive app. 
