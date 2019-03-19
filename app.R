@@ -59,11 +59,22 @@ shinyApp(
                   h2( "Line graph" ),
                   plotOutput( outputId = "linePlot", width = 640 ),
                   br(),
-                  h3( "My table" ),
-                  tableOutput( outputId = "dataDescr" ),
-                  br(),
-                  h4( "Sample size" ),
-                  verbatimTextOutput( outputId = "info" )
+                  
+                  fluidRow(
+                    column( width = 6, 
+                            h3( "Average spend" ),
+                            tableOutput( "dataDescr" ) ),
+                    column( width = 6, 
+                            h3( "Sample size" ),
+                            br(),
+                            verbatimTextOutput( "info" ) ) 
+                  )
+                  
+                  # h3( "My table" ),
+                  # tableOutput( outputId = "dataDescr" ),
+                  # br(),
+                  # h4( "Sample size" ),
+                  # verbatimTextOutput( outputId = "info" )
                   
       )
     )
@@ -201,10 +212,10 @@ shinyApp(
       B <- sample_size_per_city_type[[ 2 ]][ 2 ]
       C <- sample_size_per_city_type[[ 2 ]][ 3 ]
       
-      paste( "Total number of customers for each city type (under input conditions defined): \n",
-             "A =", format( A, big.mark = "," ), "\n",
-             "B =", format( B, big.mark = "," ), "\n",
-             "C =", format( C, big.mark = "," ) )
+      paste( "Total number of customers for each city type\n(under input conditions defined): \n",
+             "City type A =", format( A, big.mark = "," ), "\n",
+             "City type B =", format( B, big.mark = "," ), "\n",
+             "City type C =", format( C, big.mark = "," ) )
 
     })
     
