@@ -71,13 +71,7 @@ shinyApp(
                                     verbatimTextOutput( "info" ) ) )
 
                   )
-                  
-                  # h3( "My table" ),
-                  # tableOutput( outputId = "dataDescr" ),
-                  # br(),
-                  # h4( "Sample size" ),
-                  # verbatimTextOutput( outputId = "info" )
-                  
+
       )
     )
   ),
@@ -96,7 +90,7 @@ shinyApp(
       
       print( "PREPPING DATA ON START" )
       
-      BFsales <- fread( "/home/caterina/Documents/BlackFridayShinyApp/BlackFriday.csv" )
+      BFsales <- fread( "BlackFriday.csv" )
       
       BFsales[ , User_ID := as.factor( User_ID ) ]
       BFsales[ , Product_ID := as.factor( Product_ID ) ]
