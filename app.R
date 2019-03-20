@@ -31,7 +31,7 @@ shinyApp(
                     br(),
                     
                     sliderInput( inputId = "YearsSpentInCity", 
-                                 label = "Number of years lived in city:",
+                                 label = "Number of years spent in city:",
                                  min = 0, max = 4, 
                                  value = c( 0, 4 ) ),
                     
@@ -61,13 +61,15 @@ shinyApp(
                   br(),
                   
                   fluidRow(
-                    column( width = 6, 
-                            h3( "Average spend" ),
-                            tableOutput( "dataDescr" ) ),
-                    column( width = 6, 
-                            h3( "Sample size" ),
-                            br(),
-                            verbatimTextOutput( "info" ) ) 
+                    column( width = 9,
+                            column( width = 7, 
+                                    h3( "Average spend" ),
+                                    tableOutput( "dataDescr" ) ),
+                            column( width = 5, 
+                                    h3( "Sample size" ),
+                                    br(),
+                                    verbatimTextOutput( "info" ) ) )
+
                   )
                   
                   # h3( "My table" ),
@@ -94,7 +96,7 @@ shinyApp(
       
       print( "PREPPING DATA ON START" )
       
-      BFsales <- fread( "/home/caterina/Documents/TDL_PrivateRepos/BlackFridayShinyApp/BlackFriday.csv" )
+      BFsales <- fread( "/home/caterina/Documents/BlackFridayShinyApp/BlackFriday.csv" )
       
       BFsales[ , User_ID := as.factor( User_ID ) ]
       BFsales[ , Product_ID := as.factor( Product_ID ) ]
@@ -179,7 +181,7 @@ shinyApp(
       tabular_vals[ , B := format( B, nsmall = 2, big.mark = "," ) ]
       tabular_vals[ , C := format( C, nsmall = 2, big.mark = "," ) ]
       
-      setnames( tabular_vals, c( "Age band", "City A", "City B", "City C" ) )
+      setnames( tabular_vals, c( "Age band", "City type A", "City type B", "City type C" ) )
       
       return( tabular_vals )
       
