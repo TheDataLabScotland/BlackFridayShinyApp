@@ -3,7 +3,7 @@ library( data.table )
 library( ggplot2 )
 library( viridis )
 
-BFsales <- fread( "/home/caterina/Documents/TDL_PrivateRepos/BlackFridayShinyApp/BlackFriday.csv" )
+BFsales <- fread( "BlackFriday.csv" )
 
 BFsales[ , User_ID := as.factor( User_ID ) ]
 

@@ -57,15 +57,15 @@ shinyApp(
       mainPanel ( width = 9,
                   
                   h2( "Line graph" ),
-                  plotOutput( outputId = "linePlot", width = 640 ),
+                  plotOutput( outputId = "linePlot", width = 750 ),
                   br(),
                   
                   fluidRow(
                     column( width = 9,
-                            column( width = 7, 
+                            column( width = 6, 
                                     h3( "Average spend" ),
                                     tableOutput( "dataDescr" ) ),
-                            column( width = 5, 
+                            column( width = 6, 
                                     h3( "Sample size" ),
                                     br(),
                                     verbatimTextOutput( "info" ) ) )
@@ -195,7 +195,8 @@ shinyApp(
         labs( x = "City category",
               color = "Age band" ) +
         ggtitle( "Average spend according to customer age and city type",
-                 subtitle = "- Add note here -" )
+                 subtitle = "Total spend computed per customer, and then averaged across age bands and locations" ) +
+        theme( text = element_text( size = 16 ) )
       
     })
     
@@ -220,5 +221,11 @@ shinyApp(
 
 
 
+
+# Discover more -----------------------------------------------------------
+
+# https://deanattali.com/blog/building-shiny-apps-tutorial/
+# http://rstudio.github.io/shiny/tutorial/
+# https://shiny.rstudio.com/articles
 
 
