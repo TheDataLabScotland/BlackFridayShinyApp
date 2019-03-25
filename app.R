@@ -3,6 +3,7 @@
 
 options( scipen = 999 )
 
+library( shiny )
 library( data.table )
 library( ggplot2 )
 library( tidyr )
@@ -18,65 +19,65 @@ shinyApp(
   
   # UI ----------------------------------------------------------------------
   
-  ui = fluidPage(
-    
-    titlePanel( tagList( icon( "shopping-basket" ), "Black Friday sales" ) ),
-    br(),
-    sidebarLayout(
-      
-      sidebarPanel( width = 3,
-                    
-                    checkboxGroupInput( inputId = "Gender", 
-                                        label = "Select customer gender:", 
-                                        choices = c( "Male", "Female" ), 
-                                        selected = c( "Male", "Female" ) ),
-                    
-                    br(),
-                    
-                    sliderInput( inputId = "YearsSpentInCity", 
-                                 label = "Number of years spent in city:",
-                                 min = 0, max = 4, 
-                                 value = c( 0, 4 ) ),
-                    
-                    br(),
-                    
-                    radioButtons(
-                      inputId = "splitByProdCat",
-                      label = "Subset by product category?",
-                      choices = c( "No" = "No",
-                                   "Yes" = "Yes" ),
-                      selected = "No" ),
-                    
-                    br(),
-                    
-                    conditionalPanel(
-                      condition = "input.splitByProdCat == 'Yes'",
-                      uiOutput( "productCategories" )      # show all product categories
-                    )
-                    
-                    
-      ),
-      
-      mainPanel ( width = 9,
+  ui = fluidPage( title = "Black Friday",
                   
-                  h2( "Line graph" ),
-                  plotOutput( outputId = "linePlot", width = 750 ),
+                  titlePanel( tagList( icon( "shopping-basket" ), "Black Friday sales" ) ),
                   br(),
-                  
-                  fluidRow(
-                    column( width = 9,
-                            column( width = 6, 
-                                    h3( "Average spend" ),
-                                    tableOutput( "dataDescr" ) ),
-                            column( width = 6, 
-                                    h3( "Sample size" ),
-                                    br(),
-                                    verbatimTextOutput( "info" ) ) )
-
+                  sidebarLayout(
+                    
+                    sidebarPanel( width = 3,
+                                  
+                                  checkboxGroupInput( inputId = "Gender", 
+                                                      label = "Select customer gender:", 
+                                                      choices = c( "Male", "Female" ), 
+                                                      selected = c( "Male", "Female" ) ),
+                                  
+                                  br(),
+                                  
+                                  sliderInput( inputId = "YearsSpentInCity", 
+                                               label = "Number of years spent in city:",
+                                               min = 0, max = 4, 
+                                               value = c( 0, 4 ) ),
+                                  
+                                  br(),
+                                  
+                                  radioButtons(
+                                    inputId = "splitByProdCat",
+                                    label = "Subset by product category?",
+                                    choices = c( "No" = "No",
+                                                 "Yes" = "Yes" ),
+                                    selected = "No" ),
+                                  
+                                  br(),
+                                  
+                                  conditionalPanel(
+                                    condition = "input.splitByProdCat == 'Yes'",
+                                    uiOutput( "productCategories" )      # show all product categories
+                                  )
+                                  
+                                  
+                    ),
+                    
+                    mainPanel ( width = 9,
+                                
+                                h2( "Line graph" ),
+                                plotOutput( outputId = "linePlot", width = 750 ),
+                                br(),
+                                
+                                fluidRow(
+                                  column( width = 9,
+                                          column( width = 6, 
+                                                  h3( "Average spend" ),
+                                                  tableOutput( "dataDescr" ) ),
+                                          column( width = 6, 
+                                                  h3( "Sample size" ),
+                                                  br(),
+                                                  verbatimTextOutput( "info" ) ) )
+                                  
+                                )
+                                
+                    )
                   )
-
-      )
-    )
   ),
   
   
@@ -146,13 +147,13 @@ shinyApp(
         validate( need( ! is.null( input$prodCats ), "Please wait. Generating dynamic menu from data..." ) )
         selected_subset <- prepData()[ Product_Category_1 == input$prodCats, ]
       }
-
+      
       
       selected_subset <- selected_subset[ Gender %in% input$Gender, ]
       
       selected_subset <- selected_subset[ input$YearsSpentInCity[ 1 ] <= Stay_In_Current_City_Years & 
                                             Stay_In_Current_City_Years <= input$YearsSpentInCity[ 2 ], ]
-
+      
       return( selected_subset )
       
     })
@@ -214,7 +215,7 @@ shinyApp(
              "City type A =", format( A, big.mark = "," ), "\n",
              "City type B =", format( B, big.mark = "," ), "\n",
              "City type C =", format( C, big.mark = "," ) )
-
+      
     })
     
   }
