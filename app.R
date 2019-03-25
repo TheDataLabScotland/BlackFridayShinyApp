@@ -230,3 +230,10 @@ shinyApp(
 # https://shiny.rstudio.com/articles
 
 
+# Homework ----------------------------------------------------------------
+
+# Tweak the UI to include suitable inputs for:
+## Occupation
+## Marital status
+## Product category 2 or 3 (careful about handling missing data here) 
+# And then update the server function to use these newly-added inputs!
