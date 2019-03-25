@@ -223,6 +223,11 @@ shinyApp(
 
 
 
+# Check out the deployed app: -----------------------------------------------------------------
+
+# https://thedatalab.shinyapps.io/BlackFridayShinyApp/
+
+
 # Discover more -----------------------------------------------------------
 
 # https://deanattali.com/blog/building-shiny-apps-tutorial/
