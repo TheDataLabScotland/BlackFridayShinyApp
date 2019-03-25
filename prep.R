@@ -25,14 +25,13 @@ BFsales[ , Product_Category_3 := as.factor( Product_Category_3 ) ]
 
 BFsales[ , Age := ifelse( Age == "0-17", "Under 17", Age ) ]
 BFsales[ , Age := ifelse( Age == "55+", "Over 55", Age ) ]
-BFsales[ , Age := ordered( Age, levels = c( "Under 17", "18-25", "26-35",  "36-45", "46-50", "51-55","Over 55" ) ) ]
+BFsales[ , Age := ordered( Age, levels = c( "Under 17", "18-25", "26-35",  "36-45", "46-50", "51-55", "Over 55" ) ) ]
 
 head( BFsales )
 
 
 
-
-# What product category seems to suit what ages??
+# How much did *individuals* spend on average depending on city category and age?
 purchase_by_age_agr <- aggregate( Purchase ~ User_ID + Age + City_Category, data = BFsales, FUN = sum )
 purchase_by_age_agr <- aggregate( Purchase ~ Age + City_Category, data = purchase_by_age_agr, FUN = mean )
 
@@ -47,8 +46,8 @@ ggplot( purchase_by_age_agr,
            subtitle = "- Add note here -" )
 
 
-# Now to investigate this further with an interactive app. 
-# We can tackle questions such as:
+# Now to investigate this further with an interactive app... 
+# That way we can more easily tackle questions such as:
 ## Is this relationship even more abrupt when looking at people residing in these cities for 4+ years, compared to 1 year?
 ## Does product category affect this relationship?
 ## Marital status, gender, occupation - any influence?
