@@ -7,6 +7,9 @@ library( data.table )
 library( ggplot2 )
 library( tidyr )
 
+BFsales <- fread( "BlackFriday.csv" )
+
+
 
 
 shinyApp(
@@ -89,8 +92,6 @@ shinyApp(
     prepData <- reactive({
       
       print( "PREPPING DATA ON START" )
-      
-      BFsales <- fread( "BlackFriday.csv" )
       
       BFsales[ , User_ID := as.factor( User_ID ) ]
       BFsales[ , Product_ID := as.factor( Product_ID ) ]
