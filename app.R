@@ -92,7 +92,7 @@ shinyApp(
     
     prepData <- reactive({
       
-      print( "PREPPING DATA ON START" )
+      # print( "PREPPING DATA ON START" )
       
       BFsales[ , User_ID := as.factor( User_ID ) ]
       BFsales[ , Product_ID := as.factor( Product_ID ) ]
@@ -138,7 +138,7 @@ shinyApp(
     
     
     subsetData <- reactive({
-      print( "GENERATING DATA SUBSET BASED ON INPUTS" )
+      # print( "GENERATING DATA SUBSET BASED ON INPUTS" )
       
       if ( input$splitByProdCat == 'No' ) {
         selected_subset <- prepData()
@@ -170,7 +170,7 @@ shinyApp(
     
     output$dataDescr <- renderTable({
       
-      print( "CREATING TABLE OF SUBSET" )
+      # print( "CREATING TABLE OF SUBSET" )
       tabular_vals <- dcast( Age ~ City_Category, value.var = "Purchase", data = getAverageSpend() )
       setDT( tabular_vals )
       tabular_vals[ , A := format( A, nsmall = 2, big.mark = "," ) ]
@@ -187,7 +187,7 @@ shinyApp(
     
     
     output$linePlot <- renderPlot({
-      print( "DRAWING PLOT" )
+      # print( "DRAWING PLOT" )
       
       ggplot( getAverageSpend(), 
               aes( x = City_Category, y = Purchase, group = Age, color = Age ) ) + 
@@ -204,7 +204,7 @@ shinyApp(
     
     
     output$info <- renderText({
-      print( "GETTING SAMPLE SIZE" )
+      # print( "GETTING SAMPLE SIZE" )
       
       sample_size_per_city_type <- aggregate( User_ID ~ City_Category, data = subsetData(), FUN = function( x ) length( unique( x ) ) )
       A <- sample_size_per_city_type[[ 2 ]][ 1 ]
